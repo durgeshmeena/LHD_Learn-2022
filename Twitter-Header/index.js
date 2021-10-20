@@ -15,32 +15,16 @@ const twitterClient = new TwitterClient({
 });
 
 
-async function get_following(){
-    const following = await twitterClient.accountsAndUsers.get_following
-    
-    
-}
-
-const f = get_following()
-.then((following)=>{
-    console.log(following)
-});
 
 
 async function create_text(width, height, text) {
     try {
       const svg_img = `
         <svg width="${width}" height="${height}">
-        <style>
-        .text {
-            font-size: 64px;
-            fill: #000;
-            font-weight: 700;
-        }
-        </style>
-        <text x="0%" y="0%" text-anchor="middle" class="text">${text}</text>
+        	<text x="50%" y="80%" text-anchor="middle" style="font-size: 150px; ">${text}</text>
         </svg>
       `;
+	//   console.log(svg_img)
       const svg_img_buffer = Buffer.from(svg_img);
       return svg_img_buffer;
     } catch (error) {
@@ -53,27 +37,30 @@ async function create_text(width, height, text) {
   async function draw_image(image_data) {
     try {
       const hour = new Date().getHours();
-      const welcomeTypes = ["Morning", "Afternoon", "Evening"];
+      const welcomeTypes = ["Mor", "After", "Eve"];
       let welcomeText = "";
   
       if (hour < 12) welcomeText = welcomeTypes[0];
       else if (hour < 18) welcomeText = welcomeTypes[1];
       else welcomeText = welcomeTypes[2];
   
-      const svg_greeting = await create_text(500, 100, welcomeText);
-  
+      const svg_greeting = await create_text(200, 50, welcomeText)
+	  const buffer = await sharp(svg_greeting).toBuffer();
+	  fs.writeFileSync('text.jpg', buffer);
+	  
       image_data.push({
         input: svg_greeting,
-        top: 52,
-        left: 220,
+        top: 200,
+        left: 250,
       });
   
       await sharp("twitter-banner.png")
         .composite(image_data)
         .toFile("new-twitter-banner.png");
+        return image_data;
   
       // upload banner to twitter
-      upload_banner(image_data);
+      // upload_banner(image_data);
     } catch (error) {
       console.log(error);
     }
@@ -97,3 +84,15 @@ async function create_text(width, height, text) {
       console.log(error);
     }
   }
+
+  const arr = [];
+  const img = draw_image(arr)
+  .then((image_d)=>{
+  	// console.log(image_d)
+  })
+
+//   const svg_greeting = create_text(300, 50, 'Evening')
+//   .then(async (svg_buffer)=>{
+// 	const buffer = await sharp(svg_buffer).toBuffer();
+// 	fs.writeFileSync('text.jpg', buffer);
+//   })
